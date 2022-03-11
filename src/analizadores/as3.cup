@@ -1,0 +1,249 @@
+package analizadores;
+import java_cup.runtime.Symbol;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+
+
+init with {:
+            public static ArrayList<String> rawlist = new ArrayList<>();
+            public static listaenlazada p2 = new listaenlazada();
+                public static listaenlazada rbol = new listaenlazada();
+                public static ArrayList<nodo> hojas = new ArrayList<>() ;
+                public static void hacearbol(listaenlazada pl, listaenlazada arbol)
+                   {
+                       nodo primero = new nodo(".");
+                       arbol.First = primero;//es el first y ahora agregar a la derecha
+                       arbol.First.agregaderecha("#");
+                       hojas.add(arbol.First.der);
+
+
+                           while (pl.First != null)
+                           {
+
+                               nodo ahoraizq;
+                               nodo ahorader;
+                               nodo ahora = pl.First;
+
+                               while (ahora != null)
+                               {
+
+                                   String j = (String) pl.popFirst().value;
+                                   ahoraizq = arbol.First;
+                                   while (ahoraizq.izq != null || ((String)ahoraizq.value).equals("|"))
+                                       ahoraizq = ahoraizq.izq;
+                                   if (((String)ahoraizq.value).equals("."))
+                                   {
+                                       if(j.equals(")"))//CAMBIAR LOS UNIQ A DER Y VER QUE LOS ) ESTEN BIEN VALIDADOS VOLVER A SEGUIR EL ALGORITMO PASO A PASO CON LA TABLA
+                                       {
+                                           String pa = (String) pl.popFirst().value;
+                                           String conec = (String) pl.popFirst().value;
+                                           String sa = (String) pl.popFirst().value;
+                                           pl.popFirst();
+                                           ahoraizq.agregaizquierda(conec);
+                                           ahoraizq = ahoraizq.izq;
+                                           ahoraizq.agregaizquierda(pa);
+                                           ahoraizq.agregaderecha(sa);
+                                           hojas.add(ahoraizq.der);//AGREGA A HOJAS ARRAY
+                                           hojas.add(ahoraizq.izq);//AGREGA A HOJAS ARRAY
+
+                                       }
+                                       else
+                                       {
+                                           ahoraizq.agregaizquierda(j);
+                                           ahoraizq = ahoraizq.izq;
+                                           if((j.equals("*")||j.equals("+")||j.equals("?") )&& pl.First!=null)
+                                           {
+                                               j = (String) pl.popFirst().value;
+                                               if(j.equals(")"))
+                                               {
+                                                   String pa = (String) pl.popFirst().value;
+                                                   String conec = (String) pl.popFirst().value;
+                                                   String sa = (String) pl.popFirst().value;
+                                                   pl.popFirst();
+                                                   ahoraizq.agregaderecha(conec);
+                                                   ahoraizq = ahoraizq.der;
+                                                   ahoraizq.agregaizquierda(pa);
+                                                   ahoraizq.agregaderecha(sa);
+                                                   hojas.add(ahoraizq.der);//AGREGA A HOJAS ARRAY
+                                                   hojas.add(ahoraizq.izq);//AGREGA A HOJAS ARRAY
+
+                                               }
+                                               else
+                                               {
+                                                   ahoraizq.agregaderecha(j);
+                                                   hojas.add(ahoraizq.der);///agrega a hojas array
+                                               }
+
+
+
+
+                                           }
+
+
+                                       }
+                                   }
+                                   else
+                                   {
+                                       nodo reemplazo = ahoraizq;
+                                       ahoraizq.Prev.izq = null;
+
+                                       nodo ahorizaiz = arbol.First;
+                                       while (ahorizaiz.izq != null || ((String)ahorizaiz.value).equals("|"))
+                                           ahorizaiz = ahorizaiz.izq;
+                                       ahorizaiz.agregaizquierda(".");
+                                       ahorizaiz = ahorizaiz.izq;
+                                       ahorizaiz.der = reemplazo;
+                                       if (!((String)ahorizaiz.der.value).equals("*")||!((String)ahorizaiz.der.value).equals("+")||!((String)ahorizaiz.der.value).equals("?")||!((String)ahorizaiz.der.value).equals("|"))
+                                           hojas.add(ahorizaiz.der);
+                                       if(j.equals(")"))
+                                       {
+                                           String pa = (String) pl.popFirst().value;
+                                           String conec = (String) pl.popFirst().value;
+                                           String sa = (String) pl.popFirst().value;
+                                           pl.popFirst();
+                                           ahorizaiz.agregaizquierda(conec);
+                                           ahorizaiz = ahoraizq.izq;
+                                           ahorizaiz.agregaizquierda(pa);
+                                           ahorizaiz.agregaderecha(sa);
+                                           hojas.add(ahorizaiz.der);//AGREGA A HOJAS ARRAY
+                                           hojas.add(ahorizaiz.izq);//AGREGA A HOJAS ARRAY
+
+                                       }
+                                       else
+                                       {
+                                           ahorizaiz.agregaizquierda(j);
+                                           if (!(j.equals("*"))||!(j.equals("+"))||!(j.equals("?")) )
+                                                       hojas.add(ahorizaiz.izq);///agrega a hojas array
+                                       }
+                                       ahorizaiz = ahorizaiz.izq;
+                                       if((j.equals("*")||j.equals("+")||j.equals("?") )&& pl.First!=null)
+                                       {
+                                           j = (String) pl.popFirst().value;
+                                           if(j.equals(")"))
+                                           {
+                                               String pa = (String) pl.popFirst().value;
+                                               String conec = (String) pl.popFirst().value;
+                                               String sa = (String) pl.popFirst().value;
+                                               pl.popFirst();
+                                               ahorizaiz.agregaderecha(conec);
+                                               ahorizaiz = ahorizaiz.der;
+                                               ahorizaiz.agregaizquierda(pa);
+                                               ahorizaiz.agregaderecha(sa);
+                                               hojas.add(ahorizaiz.der);//AGREGA A HOJAS ARRAY
+                                               hojas.add(ahorizaiz.izq);//AGREGA A HOJAS ARRAY
+
+                                           }
+                                           else
+                                           {
+                                               ahorizaiz.agregaderecha(j);
+                                                   hojas.add(ahorizaiz.der);///agrega a hojas array
+                                           }
+
+
+
+
+                                       }
+
+                                   }
+
+                                   ahora = pl.First;
+                               }
+
+                               //AHORA HACERLO GRAFICO
+
+
+                           }
+
+
+
+
+
+                   }
+
+
+                    public static String texto;
+                    public static void imprime_arbol(nodo root)
+                    {
+                        texto+=root+"\n";
+                        System.out.println("------------");
+                        System.out.println(root+":");
+                        System.out.println("R:"+root.der);
+                        System.out.println("L:"+root.izq);
+                        if (root.izq!=null) {
+                            texto+=root.hashCode()+"->"+root.izq.hashCode()+";\n";
+                            imprime_arbol(root.izq);
+                        }
+                        if (root.der!=null) {
+                            texto+=root.hashCode()+"->"+root.der.hashCode()+";\n";
+                            imprime_arbol(root.der);
+                        }
+                    }
+                    public static void imprime_completo()
+                    {
+                        texto = "digraph G\n"
+                                +"{label=\"expresion regular\"\n"
+                                +"        node[shape = circle]\n"
+                                +"        node[style = filled]\n"
+                                +"        node[fillcolor = \"#EEEEE\"]\n"
+                                +"        node[color = \"#EEEEE\"]\n"
+                                +"        node[color = \"#31CEF0\"]\n";
+
+                        imprime_arbol(rbol.First);
+
+                        texto+="\n"
+                                +"}";
+                        System.out.println(texto);
+                        texto = "";
+
+                    }
+
+             :};
+terminal frase;
+terminal o;
+terminal declaracion;
+terminal mas;
+terminal asterisco;
+terminal pregunta;
+terminal abre_parentesis;
+terminal cierra_parentesis;
+
+
+non terminal INICIO,E, ersim;
+start with INICIO;
+
+INICIO::= E {:
+String err = "";
+Collections.reverse(rawlist);
+for (String n:rawlist)
+{
+err+=n;
+p2.agrega(n);
+}
+System.out.println(p2);
+hacearbol(p2,rbol);
+imprime_completo();
+p2.First = null;
+rawlist.clear();
+
+
+
+
+
+                           :}
+;
+E::= E ersim
+|ersim
+;
+ersim ::= frase:frase{:rawlist.add(String.valueOf(frase));System.out.println("SI ENTRA LA CONCHAETUMADRE"+frase);:}
+| o:o{:rawlist.add(String.valueOf(o));:}
+| declaracion:declaracion{:rawlist.add(String.valueOf(declaracion));:}
+| mas:mas{:rawlist.add(String.valueOf(mas));:}
+| asterisco:asterisco{:rawlist.add(String.valueOf(asterisco));:}
+| pregunta:pregunta{:rawlist.add(String.valueOf(pregunta));:}
+| abre_parentesis:abre_parentesis{:rawlist.add(String.valueOf(abre_parentesis));:}
+| cierra_parentesis:cierra_parentesis{:rawlist.add(String.valueOf(cierra_parentesis));:}
+
+;

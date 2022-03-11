@@ -1,0 +1,80 @@
+package analizadores;
+import java_cup.runtime.Symbol;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+
+init with {:public static listaenlazada stackER = new listaenlazada();
+            public static ArrayList<String> rawlist = new ArrayList<>();
+            public static ArrayList<String> r ;
+             public static void rec()
+                {
+                    for (int i = 0; i < r.size(); i++) {
+                        if (r.get(i).equals("+") ||  r.get(i).equals("*") || r.get(i).equals("?"))
+                        {
+                            String str = r.get(i-1);
+                            r.set(i-1,str+r.get(i));
+                            r.remove(i);
+                            rec();
+                            break;
+                        }
+                        else if (r.get(i).equals("|")) {
+                            String str = r.get(i-2);
+                            r.set(i-2,"("+str+r.get(i)+r.get(i-1)+")");
+                            r.remove(i);
+                            r.remove(i-1);
+                            rec();
+                            break;
+                        }
+                        else if (r.get(i).equals(".")) {
+                            String str = r.get(i-2);
+                            r.set(i-2,r.get(i-1)+str);
+                            r.remove(i);
+                            r.remove(i-1);
+                            rec();
+                            break;
+
+
+                        }
+
+
+                    }
+
+                }
+             :};
+terminal frase;
+terminal o;
+terminal declaracion;
+terminal punto;
+terminal mas;
+terminal asterisco;
+terminal pregunta;
+
+
+non terminal INICIO,E, ersim;
+start with INICIO;
+
+INICIO::= E {: Collections.reverse(rawlist);r = rawlist;
+rec();
+ FileWriter myWriter = new FileWriter("./ERS2.txt");
+                                                              myWriter.write(r.get(0));
+                                                              myWriter.close();
+
+                                                        analizador_lexico3 lexico = new analizador_lexico3(new BufferedReader(new FileReader("./ERS2.txt")));
+                                                        Analizador_sintactico3 sintactico = new Analizador_sintactico3(lexico);
+                                                        sintactico.parse();
+System.out.println(r.get(0));rawlist.clear();:}
+;
+E::= E ersim
+|ersim
+;
+ersim ::= frase:frase{:rawlist.add(String.valueOf(frase));:}
+| o:o{:rawlist.add(String.valueOf(o));:}
+| declaracion:declaracion{:rawlist.add(String.valueOf(declaracion));:}
+| punto:punto{:rawlist.add(String.valueOf(punto));:}
+| mas:mas{:rawlist.add(String.valueOf(mas));:}
+| asterisco:asterisco{:rawlist.add(String.valueOf(asterisco));:}
+| pregunta:pregunta{:rawlist.add(String.valueOf(pregunta));:}
+;
